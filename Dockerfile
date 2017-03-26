@@ -26,6 +26,14 @@ RUN /home/main/anaconda/envs/python3/bin/pip install --upgrade https://github.co
 RUN /home/main/anaconda/envs/python3/bin/pip install --upgrade https://github.com/yandexdataschool/AgentNet/archive/master.zip
 RUN mkdir ~/gym3 && cd ~/gym3 && git clone https://github.com/openai/gym.git && cd gym && /home/main/anaconda/envs/python3/bin/pip install -e .[atari]
 
-RUN apt-get install libboost-program-options-dev zlib1g-dev libboost-python-dev
-RUN git clone git://github.com/JohnLangford/vowpal_wabbit.git
-RUN cd vowpal_wabbit && make && make install
+# Vowpal Wabbit 
+USER root 
+RUN apt-get install -y libboost-program-options-dev zlib1g-dev libboost-python-dev libtool automake \
+		       libpthread-stubs0-dev libxmu-dev libc6 libgcc1 libstdc++6 build-essential
+
+USER main
+RUN cd && git clone git://github.com/JohnLangford/vowpal_wabbit.git
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+USER root
+RUN cd vowpal_wabbit && ./autogen.sh && ./configure --with-boost-libdir=/usr/lib/x86_64-linux-gnu && make && make install
